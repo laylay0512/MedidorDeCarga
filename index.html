@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Medidor de Carga - Física Interativa</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Medidor de Carga</h1>
+
+        <div class="animation">
+            <div class="plate left"></div>
+            <div class="plate right"></div>
+            <div class="string" id="string">
+                <div class="ball"></div>
+            </div>
+        </div>
+
+        <div class="form">
+            <div class="input-group">
+                <label for="campo">Campo Elétrico (N/C):</label>
+                <input type="number" id="campo" placeholder="Ex.: 500" required />
+            </div>
+
+            <div class="input-group">
+                <label for="massa">Massa da Esfera (kg):</label>
+                <input type="number" id="massa" placeholder="Ex.: 0.05" required />
+            </div>
+
+            <div class="input-group">
+                <label for="angulo">Ângulo de Desvio (graus):</label>
+                <input type="number" id="angulo" placeholder="Ex.: 15" required />
+            </div>
+
+            <button onclick="calcular()">Calcular Carga</button>
+        </div>
+
+        <div class="result" id="resultado"></div>
+
+        <canvas id="grafico"></canvas>
+    </div>
+
+    <script>
+    function calcular() {
+        const E = parseFloat(document.getElementById('campo').value);
+        const m = parseFloat(document.getElementById('massa').value);
+        const ang = parseFloat(document.getElementById('angulo').value);
+
+        const resultado = document.getElementById('resultado');
+
+        if (isNaN(E) || isNaN(m) || isNaN(ang)) {
+            resultado.innerHTML = `<span style="color: #ff8080;">Por favor, preencha todos os campos corretamente!</span>`;
+            return;
+        }
+
+        resultado.innerHTML = "";
+
+        const angRad = ang * Math.PI / 180;
+        const g = 9.8;
+
+        const q = (m * g * Math.tan(angRad)) / E;
+
+        resultado.innerHTML = `A carga na esfera é aproximadamente <b>${q.toExponential(3)} C</b>`;
+
+        // Animação do fio
+        const string = document.getElementById('string');
+        string.style.transform = `rotate(${ang}deg)`;
+
+        // Atualiza gráfico
+        grafico.data.labels.push(ang);
+        grafico.data.datasets[0].data.push(q);
+        grafico.update();
+    }
+
+    const ctx = document.getElementById('grafico').getContext('2d');
+    const grafico = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Carga (C)',
+                data: [],
+                borderColor: 'white',           // Linha branca
+                backgroundColor: 'rgba(255, 255, 255, 0.2)', // Fundo translúcido branco
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'white'           // Cor do texto da legenda
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: 'white'           // Linhas da grade eixo X brancas
+                    },
+                    ticks: {
+                        color: 'white'           // Números do eixo X brancos
+                    },
+                    title: {
+                        display: true,
+                        text: 'Ângulo (graus)',
+                        color: 'white'           // Título eixo X branco
+                    }
+                },
+                y: {
+                    grid: {
+                        color: 'white'           // Linhas da grade eixo Y brancas
+                    },
+                    ticks: {
+                        color: 'white'           // Números do eixo Y brancos
+                    },
+                    title: {
+                        display: true,
+                        text: 'Carga (C)',
+                        color: 'white'           // Título eixo Y branco
+                    }
+                }
+            }
+        }
+    });
+    </script>
+</body>
+</html>
